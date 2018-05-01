@@ -6,13 +6,9 @@ Some resources:
 * [xzion/dota2-gsi](https://github.com/xzion/dota2-gsi)
 * [antonpup/Dota2GSI](https://github.com/antonpup/Dota2GSI)
 
----
-
 ## Usage
 
 *to-do*
-
----
 
 ## Format of `.cfg` files
 
