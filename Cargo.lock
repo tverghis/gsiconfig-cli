@@ -1,5 +1,5 @@
 [[package]]
-name = "gsiconfig-cli"
+name = "gsicfg"
 version = "0.1.0"
 dependencies = [
  "url 1.7.0 (registry+https://github.com/rust-lang/crates.io-index)",

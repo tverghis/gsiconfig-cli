@@ -1,5 +1,5 @@
 [package]
-name = "gsiconfig-cli"
+name = "gsicfg"
 version = "0.1.0"
 authors = ["tverghis <tarun.verghis@gmail.com>"]
 
