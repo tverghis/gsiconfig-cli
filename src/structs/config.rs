@@ -4,13 +4,33 @@ use serializer::{Serializer, Serializable, FieldType};
 use structs::request_data::RequestData;
 use structs::auth_data::AuthData;
 
+/// Represents the overall structure of the configuration file.
+/// Contains some details about the listening endpoint, as well as what information to send.
+///
+/// A lot of detailed information about the fields can be found [here](https://developer.valvesoftware.com/wiki/Counter-Strike:_Global_Offensive_Game_State_Integration#Endpoint_Section_Settings).
 pub struct Config {
+
+    /// The address of the endpoint that is listening for GSI requests.
     pub uri: Url,
+
+    /// Number of seconds before the game should consider requests as having timed out.
     pub timeout: f32,
+
+    /// Number of seconds to collect events before sending them to the server.
+    /// Can be low/0 for LAN endpoints.
     pub buffer: f32,
+
+    /// Minimum number of seconds to wait between sending requests to the server.
     pub throttle: f32,
+
+    /// If no game event updates happen after a successful response,
+    /// the game will wait `heartbeat` seconds before pinging the server again.
     pub heartbeat: f32,
+
+    /// The game data that the game should send to the endpoint.
     pub request_data: RequestData,
+
+    /// Tokens that can be used to authenticate the payload in non-LAN settings.
     pub auth_data: AuthData,
 }
 

@@ -1,14 +1,40 @@
 use serializer::{Serializer, Serializable, FieldType};
 
+/// Represents the data that the game sends to the listening endpoint.
+///
+/// Any fields that are set to `true` will be sent to the endpoint,
+/// and are otherwise omitted.
+///
+/// Some more information can be found [here](https://github.com/antonpup/Dota2GSI#layout).
+///
+/// *Fields that are marked with **[?]** have best-guess documentation currently.*
 pub struct RequestData {
+
+    /// Information about building status. **[?]**
     pub buildings: bool,
+
+    /// Some metadata about the sender.
     pub provider: bool,
+
+    /// Information about the current map & game state.
     pub map: bool,
+
+    /// Non-hero specific information about the player's current state.
     pub player: bool,
+
+    /// Hero-specific information (like health and mana).
     pub hero: bool,
+
+    /// Information about the state of the hero's spells.
     pub abilities: bool,
+
+    /// Information about the state of the hero's items.
     pub items: bool,
+
+    /// Information about the draft. **[?]**
     pub draft: bool,
+
+    /// Information about the hero's currently equipped cosmetics. **[?]**
     pub wearables: bool,
 }
 
