@@ -1,4 +1,7 @@
+extern crate gsicfg;
 extern crate url;
+
+use gsicfg::serializer::{Serializer, Serializable, FieldType};
 
 use url::Url;
 
@@ -13,33 +16,22 @@ struct Config {
     buffer: f32,
     throttle: f32,
     heartbeat: f32,
-    request_data: RequestData
+    request_data: RequestData,
+    auth_data: AuthData,
 }
 
-impl Config {
+impl Serializable for Config {
     fn serialize(&self) -> String {
-        format!(
-            "\
-                \"dota2-gsi Configuration\"\n\
-                {{\n\
-                    \t{uri}\n\
-                    \t{timeout}\n\
-                    \t{buffer}\n\
-                    \t{throttle}\n\
-                    \t{heartbeat}\n\
-                    {request_data}\n\
-                }}
-            ",
-            uri=self.uri.as_str().cfg_out("uri"),
-            timeout=self.timeout.cfg_out("timeout"),
-            buffer=self.buffer.cfg_out("buffer"),
-            throttle=self.throttle.cfg_out("throttle"),
-            heartbeat=self.heartbeat.cfg_out("heartbeat"),
-            request_data=self.request_data.serialize()
-                                .lines()
-                                .map(|line| format!("\t{}\n", line))
-                                .collect::<String>().trim_right(),
-        )
+        let mut serializer = Serializer { output: String::new(), indent: 1 };
+        serializer.serialize_struct("dota2-gsi Configuration");
+        serializer.serialize_field("uri", FieldType::FString(self.uri.as_str().to_string()));
+        serializer.serialize_field("timeout", FieldType::FFloat(self.timeout));
+        serializer.serialize_field("buffer", FieldType::FFloat(self.buffer));
+        serializer.serialize_field("throttle", FieldType::FFloat(self.throttle));
+        serializer.serialize_field("heartbeat", FieldType::FFloat(self.heartbeat));
+        serializer.add_serialized_field(&self.request_data.serialize());
+        serializer.add_serialized_field(&self.auth_data.serialize());
+        serializer.end(false)
     }
 }
 
@@ -52,74 +44,36 @@ struct RequestData {
     abilities: bool,
     items: bool,
     draft: bool,
-    wearables: bool
+    wearables: bool,
 }
 
-impl RequestData {
+impl Serializable for RequestData {
     fn serialize(&self) -> String {
-        let mut output = String::from("\"data\"\n");
-        output.push_str("{\n");
-
-        if self.buildings {
-            output.push_str(&format!("\t{}\n", self.buildings.cfg_out("buildings")));
-        }
-
-        if self.provider {
-            output.push_str(&format!("\t{}\n", self.provider.cfg_out("provider")));
-        }
-
-        if self.map {
-            output.push_str(&format!("\t{}\n", self.map.cfg_out("map")));
-        }
-        
-        if self.player {
-            output.push_str(&format!("\t{}\n", self.player.cfg_out("player")));
-        }
-
-        if self.hero {
-            output.push_str(&format!("\t{}\n", self.hero.cfg_out("hero")));
-        }
-
-        if self.abilities {
-            output.push_str(&format!("\t{}\n", self.abilities.cfg_out("abilities")));
-        }
-
-        if self.items {
-            output.push_str(&format!("\t{}\n", self.items.cfg_out("items")));
-        }
-        
-        if self.draft {
-            output.push_str(&format!("\t{}\n", self.draft.cfg_out("draft")));
-        }
-
-        if self.wearables {
-            output.push_str(&format!("\t{}\n", self.wearables.cfg_out("wearables")));
-        }
-
-        output.push_str("}");
-        output
+        let mut serializer = Serializer { output: String::new(), indent: 2 };
+        serializer.serialize_struct("data");
+        if self.buildings { serializer.serialize_field("buildings", FieldType::FBool(self.buildings)); }
+        if self.provider {serializer.serialize_field("provider", FieldType::FBool(self.provider)); }
+        if self.map { serializer.serialize_field("map", FieldType::FBool(self.map)); }
+        if self.player { serializer.serialize_field("player", FieldType::FBool(self.player)); }
+        if self.hero { serializer.serialize_field("hero", FieldType::FBool(self.hero)); }
+        if self.abilities { serializer.serialize_field("abilities", FieldType::FBool(self.abilities)); }
+        if self.items { serializer.serialize_field("items", FieldType::FBool(self.items)); }
+        if self.draft { serializer.serialize_field("draft", FieldType::FBool(self.draft)); }
+        if self.wearables { serializer.serialize_field("wearables", FieldType::FBool(self.wearables)); }
+        serializer.end(true)
     }
 }
 
-trait WriteableField {
-    fn cfg_out(&self, field_name: &str) -> String;
+struct AuthData {
+    token: String
 }
 
-impl<'a> WriteableField for &'a str {
-    fn cfg_out(&self, field_name: &str) -> String {
-        format!("\"{}\"\t\"{}\"", field_name, self)
-    }
-}
-
-impl WriteableField for f32 {
-    fn cfg_out(&self, field_name: &str) -> String {
-        format!("\"{}\"\t\"{:.1}\"", field_name, self)
-    }
-}
-
-impl WriteableField for bool {
-    fn cfg_out(&self, field_name: &str) -> String {
-        format!("\"{}\"\t\"1\"", field_name)
+impl Serializable for AuthData {
+    fn serialize(&self) -> String {
+        let mut serializer = Serializer { output: String::new(), indent: 2 };
+        serializer.serialize_struct("auth");
+        serializer.serialize_field("token", FieldType::FString(self.token.clone()));
+        serializer.end(true)
     }
 }
 
@@ -145,6 +99,9 @@ fn main() {
             items: true,
             player: true,
             wearables: true
+        },
+        auth_data: AuthData {
+            token: String::from("hello123")
         }
     };
 
